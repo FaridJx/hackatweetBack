@@ -24,10 +24,11 @@ router.post("/signup", function (req, res, next) {
         firstname: req.body.firstname,
         password: hash,
         token: uid2(32),
+        canTweet: true
       });
 
       newUser.save().then((newDoc) => {
-        console.log(newDoc);
+        res.json(newDoc);
       });
     }
   });
@@ -48,5 +49,16 @@ router.post("/signin", function (req, res, next) {
     }
   })
 })
+
+
+router.get('/canTweet/:token', (req, res) => {
+  User.findOne({ token: req.params.token }).then(data => {
+    if (data) {
+      res.json({ result: true, canTweet: data.canTweet });
+    } else {
+      res.json({ result: false, error: 'User not found' });
+    }
+  });
+});
 
 module.exports = router;

@@ -24,16 +24,15 @@ router.post("/signup", function (req, res, next) {
         firstname: req.body.firstname,
         password: hash,
         token: uid2(32),
-        canTweet: true
+        canTweet: true,
       });
 
       newUser.save().then((newDoc) => {
-        res.json(newDoc);
+        res.json({ result: true, newDoc });
       });
-    }
+    } else res.json({ result: false, error: "Ce compte existe déjà"});
   });
 });
-
 
 router.post("/signin", function (req, res, next) {
   if (!checkBody(req.body, ["username", "password"])) {
@@ -41,22 +40,21 @@ router.post("/signin", function (req, res, next) {
     return;
   }
 
-  User.findOne({ username: req.body.username}).then(data => {
+  User.findOne({ username: req.body.username }).then((data) => {
     if (data && bcrypt.compareSync(req.body.password, data.password)) {
       res.json({ result: true, data });
     } else {
-      res.json({ result: false, error: 'User not found' });
+      res.json({ result: false, error: "User not found" });
     }
-  })
-})
+  });
+});
 
-
-router.get('/canTweet/:token', (req, res) => {
-  User.findOne({ token: req.params.token }).then(data => {
+router.get("/canTweet/:token", (req, res) => {
+  User.findOne({ token: req.params.token }).then((data) => {
     if (data) {
       res.json({ result: true, canTweet: data.canTweet });
     } else {
-      res.json({ result: false, error: 'User not found' });
+      res.json({ result: false, error: "User not found" });
     }
   });
 });

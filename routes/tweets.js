@@ -39,6 +39,7 @@ router.post("/newTweet/:token", async function (req, res, next) {
       message: message,
       date: new Date(),
       user: data._id,
+      likedBy: []
     });
 
      newTweet.save().then((e) => {
@@ -73,15 +74,15 @@ router.put('/like/:token', async (req, res) => {
       tweet.likedBy = tweet.likedBy.filter(u => u._id.toString() !== user._id.toString());
       const savedTweet = await tweet.save();
       user.likedTweets = user.likedTweets.filter(e=> e.toString()!== tweet._id.toString());
-      const savedUser = user.save()
+      const savedUser = await user.save()
       res.json({ result: true, likedBy: savedTweet.likedBy, likedTweet:savedUser.likedTweets});
       
     } else {
       tweet.likedBy.push(user._id);
       const savedTweet = await tweet.save();
       user.likedTweets.push(savedTweet._id)
-      user.save()
-      res.json({ result: true, likedBy: tweet.likedBy});
+      const savedUser = await user.save()      
+      res.json({ result: true, likedBy: savedTweet.likedBy, likedTweet:savedUser.likedTweets});
     }
 
 

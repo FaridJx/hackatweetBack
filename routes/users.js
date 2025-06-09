@@ -22,6 +22,7 @@ router.post("/signup", function (req, res, next) {
       const newUser = new User({
         username: req.body.username,
         firstname: req.body.firstname,
+        likedTweets: [],
         password: hash,
         token: uid2(32),
         canTweet: true,

@@ -55,18 +55,10 @@ router.post("/newTweet/:token", async function (req, res, next) {
 // Ajouter un like
 router.put('/like/:token', async (req, res) => {
   const user = await User.findOne({ token: req.params.token })
-    // if (user.likedtweets.length === 5) {
-    //   res.json({ result: false, error: 'Vous avez utilisé tous vos likes' })
-    //   return
-    // }
+
 
   const tweet = await Tweet.findOne({_id: req.body.tweet }).populate("likedBy")
   
-
-      // if (tweet.likedBy.length >= 5) {
-      //   res.json({ result: false, error: 'Cet objet a déjà eu le nombre maximum de likes' })
-      //   return;
-      // }
 
     const hasLiked = tweet.likedBy.some(u => u._id.toString() === user._id.toString());
 
@@ -84,53 +76,30 @@ router.put('/like/:token', async (req, res) => {
       const savedUser = await user.save()      
       res.json({ result: true, likedBy: savedTweet.likedBy, likedTweet:savedUser.likedTweets});
     }
-
-
-    // const savedTweet = await tweet.save();
-    
-    // const populatedTweet = await Tweet.findById(savedTweet._id).populate('likedBy');
-    
-      // res.json({ result: true, likedBy: populatedTweet.likedBy});
-
-        // user.likedtweets.push(savedtweet._id)
-        // user.save().then(savedUser => {
-        //   res.json({ result: true, likedBy: savedTweet.likedBy })
-        // })
-    
   
 })
 
 
-
-
-// router.put('/dislike/:token', (req, res) => {
-//   User.findOne({ token: req.params.token }).then(user => {
-
-//     // Si il n'y a pas d'objet on continue pas
-//     Tweet.findOne({ _id: req.body.tweet }).then(tweet => {
-//       if (!tweet) {
-//         res.json({ result: false, error: 'tweet not found' })
-//         return;
-//       }
-//     // la route doit recevoir le token du Donneur et pour modifier le document de l'item = le user à retirer du likedBy et l'item 
-
-//       // Supprime l'ID de l'utilisateur de la liste "likedBy" de l'objet.
-//       tweet.likedBy = tweet.likedBy.filter(e => e.toString() !== user.id.toString());
-
-//       // ça va sauvegarder l'objet mis à jour.
-//       tweet.save().then(savedtweet => {
-//         // Supprime l'ID de l'objet de la liste "likedtweets" de l'utilisateur.
-//         // On ajoute .toString() pour comparer les valeurs en string
-//         // user.likedtweets = user.likedtweets.filter(e=> e.toString()!== tweet._id.toString());
-
-//         // ça va sauvegarder l'utilisateur mis à jour.
-//         user.save().then(savedUser => {
-//           res.json({ result: true, likedBy: savedtweet.likedBy })
-//         });
-//       });
-//     });
-//   });
-// });
+router.delete('/delete/:tweetId', (req, res) => {
+    const tweetId = req.params.tweetId;
+        
+    // Effectuez la logique de suppression ici
+    Tweet.findOne({ _id: tweetId })
+        .then(tweet => {
+            if (!tweet) {
+                
+              // Le tweet n'a pas été trouvé, renvoyez une réponse d'erreur
+              return res.status(404).json({result: false, message: 'Tweet non trouvé' });
+            }
+      
+            // supprimer le tweet
+            tweet.deleteOne()
+              .then(() => {
+                // Le tweet a été supprimé avec succès, renvoyez une réponse de réussite
+                res.json({result: true, message: 'Tweet supprimé avec succès' });
+              })
+          })
+      });  
 
 
 module.exports = router;

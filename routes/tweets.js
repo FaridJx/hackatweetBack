@@ -108,12 +108,10 @@ router.delete("/delete/:tweetId", async (req, res) => {
 
     for (let i = 0; i < allTrends.length; i++) {
       const hashtag = allTrends[i].hashtag;
-      console.log(hashtag);
 
       if (tweet.message.includes(hashtag)) {
         Trends.deleteOne({ hashtag: hashtag }).then(() => {
           Trends.find().then((data) => {
-            console.log(data);
           });
         });
         break

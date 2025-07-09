@@ -2,7 +2,7 @@ var express = require("express");
 var router = express.Router();
 const Tweet = require("../models/tweets");
 const User = require("../models/users");
-const Trends = require("../models/trends");
+const Trend = require("../models/trends");
 const { checkBody } = require("../modules/checkbody");
 
 router.get("/", function (req, res, next) {
@@ -95,10 +95,10 @@ router.put("/like/:token", async (req, res) => {
 
 router.delete("/delete/:tweetId", async (req, res) => {
   const tweetId = req.params.tweetId;
-  const allTrends = await Trends.find();
+  const allTrends = await Trend.find();
 
   // Effectuez la logique de suppression ici
-  await Tweet.findOne({ _id: tweetId }).then((tweet) => {
+  await Tweet.findOne({ _id: tweetId }).then(async(tweet) => {
     if (!tweet) {
       // Le tweet n'a pas été trouvé, renvoyez une réponse d'erreur
       return res
@@ -108,14 +108,18 @@ router.delete("/delete/:tweetId", async (req, res) => {
 
     for (let i = 0; i < allTrends.length; i++) {
       const hashtag = allTrends[i].hashtag;
+      const counter = allTrends[i].counter
 
+      if(counter <= 0) {
+          await Trend.deleteOne({ hashtag: hashtag })
+        }
       if (tweet.message.includes(hashtag)) {
-        Trends.deleteOne({ hashtag: hashtag }).then(() => {
-          Trends.find().then((data) => {
-          });
-        });
-        break
+        if(counter > 0){
+          await Trend.updateOne({hashtag : hashtag}, {$inc: {counter: -1}})
+        }
+        // break
       }
+      
     }
 
     // supprimer le tweet

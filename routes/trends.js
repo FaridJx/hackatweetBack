@@ -9,14 +9,21 @@ router.get("/", function (req, res, next) {
     })
 });
 
-router.post("/new", function (req, res, next) {
-
-    const newTrend = new Trend({
-        hashtag : req.body.hashtag
-    })
-
-    newTrend.save().then(data => {
-        res.json({result: true, newTrend: data})
+router.post("/new", async (req, res, next) => {
+    Trend.findOne({hashtag : req.body.hashtag}).then(async (data) => {
+        if(data){
+           await Trend.updateOne({hashtag : data.hashtag}, {$inc: {counter: 1}})
+            res.json({result: true, trends: data})
+        } else {
+            const newTrend = new Trend({
+                hashtag : req.body.hashtag,
+                counter: 1
+            })
+        
+            newTrend.save().then(data => {
+                res.json({result: true, newTrend: data})
+            })
+        }
     })
 })
 
